@@ -9,7 +9,7 @@
 The repository is a collection of help documents I created for [NYU Data
 Services](https://guides.nyu.edu/dataservices) about various topics for
 geospatial analysis in R. The active link to the files serving on the
-Data Services can be found
+Data Services website can be found
 [here](https://guides.nyu.edu/c.php?g=276822&p=8242247).
 
 ### GIS in R: Geocoding
