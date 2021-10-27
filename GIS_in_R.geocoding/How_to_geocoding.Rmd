@@ -1,0 +1,54 @@
+---
+title: "How to convert CSV lat/long coordinates into a point shapefile"
+geometry: "left=2cm,right=2cm,top=2cm,bottom=5cm"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+urlcolor: blue
+header-includes: \usepackage{fancyhdr}
+always_allow_html: yes
+---
+\addtolength{\headheight}{2.0cm} 
+\pagestyle{fancyplain} 
+\lhead{\includegraphics[height=2cm]{/Users/junhui/Documents/R/GIS/Howto/logo.png}} 
+\renewcommand{\headrulewidth}{0pt} 
+\fancyfoot[CO,CE]{Jan. 2021 | http://guides.nyu.edu/gis | data.services@nyu.edu | (212) 998-3434 | Sources: NYU SDR| \thepage}
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Geocoding in R: convert CSV lat/long coordinates into a shapefile
+
+Geocoding in R allows you to convert tabular datasets that contain geographic information to be mapped and analyzed within GIS software. You can use functions in sf package to convert a dataframe with longitude and latitude to a spatial object and then save it as a shapefile. For example, you cleaned and analyzed a dataset of Black Lives Matter protests in R and would like to share the dataset with a collaborator, but your collaborator is not an R user. As a result, you will have to provide the collaborator with a file that can be opened up in GIS software, such as ArcGIS or QGIS. [Here is the data for this exercise.](https://drive.google.com/file/d/1-3c42REbpJJw-oDth0UEyi_fCHcwPqyf/view)
+
+1. Set your working directory to the folder where your project locates using `setwd()`. Alternatively, you can also set the working directory using the dropdown menu **Session** in RStudio. Select the **Choose Directory** and then click the project folder. After you've set the working directory, you may verify it by calling the `getwd()` function.
+
+![](WorkingDirectory.png)
+
+2. Load the package sf in R. If you do not already have the package installed, be sure to install it using command `install.packages()` before loading it. 
+
+```{r, message=FALSE}
+library(sf)
+```
+
+3. Read the tabular dataset that contains location coordinates (in the form of a latitude field and a longitude field) you would like to share or would like to further analyze before sharing. Note that right now the dataframe is not a spatial object that can be read by the geospatial package sf.
+
+```{r}
+NYC_BLM_Protests <- read.csv("NYC_BLM_Protests.csv")
+```
+
+4. Use the sf package's `st_as_sf()` function to transform the dataframe into a spatial object in which the coordinate information from the dataframe can be interpreted. For this example, "NYC_BLM_Protests" is the dataframe we want to turn into a spatial object; coords=c("Longitude","Latitude") indicates the names of the fields within the dataframe that contain longitude and latitude information (here, the names of the fields containing longitude and latitude information are "Longitude" and “Latitude"); and crs=4236 indicates the spatial reference information for the coordinates (crs=4326 corresponds to WGS1984). The WGS1984 CRS is the standard for GPS systems and is a standard coordinate system for use for locations across the globe. For more information on selecting an appropriate CRS, see this [reference.](https://www.esri.com/arcgis-blog/products/arcgis-pro/mapping/gcs_vs_pcs/) 
+
+```{r}
+NYC_BLM_Protests_spatial <- st_as_sf(NYC_BLM_Protests, coords=c("Longitude", "Latitude"), crs=4326)
+```
+
+5. Once the dataframe you wish to share is transformed to a spatial object, you can use the sf package’s `st_write()` function to write it as a shapefile. The first argument is the name of the object we want to write to our disk, while the second argument is the name we want to give to the file that will be written to our disk along with its file extension (since we want the file to be written as a shapefile, we use the .shp extension). 
+
+```{r, warning=FALSE}
+st_write(NYC_BLM_Protests_spatial, "NYC_BLM_Protests.shp")
+```
+
+At this point, the “NYC_BLM_Protests.shp” file is written to your working directory; this file can be shared with your collaborator, who can open up the shapefile in ArcGIS or QGIS. If you are a GIS user, you may wish to open up ArcGIS or QGIS and import this newly written shapefile to verify that everything looks as expected.
